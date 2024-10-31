@@ -1,7 +1,19 @@
-const { spawnSync } = require('child_process')
+const { spawnSync, spawn } = require('child_process')
 const { existsSync, writeFileSync } = require('fs')
+//read last lines!!!!!!!!!!!!!!
 
-const SESSION_ID = 'updateThis' // Edit this line only, don't remove ' <- this symbol
+const SESSION_ID = 'levanter_3159d4448d38304777a6b14a4b394b80da' // Edit this line only, don't remove ' <- this symbol
+
+function startApp() {
+  const child = spawn('node', ['index.js'], { cwd: 'levanter', stdio: 'inherit' })
+
+  child.on('exit', (code) => {
+    if (code === 102) {
+      console.log('restarting...')
+      startApp()
+    }
+  })
+}
 
 if (!existsSync('levanter')) {
   console.log('Cloning the repository...')
@@ -20,7 +32,7 @@ if (!existsSync('levanter')) {
   const configPath = 'levanter/config.env'
   try {
     console.log('Writing to config.env...')
-    writeFileSync(configPath, `VPS=true\nSESSION_ID=${levanter_29ba24b5e4fce14d6f83b65bfabbb1088c}`)
+    writeFileSync(configPath, `VPS=true\nSESSION_ID=${SESSION_ID}`)
   } catch (err) {
     throw new Error(`Failed to write to config.env: ${err.message}`)
   }
@@ -34,6 +46,18 @@ if (!existsSync('levanter')) {
   if (installResult.error) {
     throw new Error(`Failed to install dependencies: ${installResult.error.message}`)
   }
+  startApp() //delete this line to use pm2
+}else{
+  startApp() //delete this line to use pm2
 }
 
-spawnSync('yarn', ['start'], { cwd: 'levanter', stdio: 'inherit' })
+//if dependencies error uncomment below line
+
+// spawnSync('yarn', ['install', '--network-concurrency', '3'], {
+//   cwd: 'levanter',
+//   stdio: 'inherit',
+// })
+
+
+
+// spawnSync('yarn', ['docker'], { cwd: 'levanter', stdio: 'inherit' }) //remove // on this line to use pm2
